@@ -15,7 +15,7 @@ metadata:
 provisioner: kubernetes.io/portworx-volume
 parameters:
    repl: "1"
-   shared: true
+   shared: "true"
    priority_io: "high"
 ---
 kind: StorageClass
@@ -104,19 +104,6 @@ spec:
    resources:
      requests:
        storage: 5Gi
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-   name: users-db-pvc
-   annotations:
-     volume.beta.kubernetes.io/storage-class: portworx-db-ha
-spec:
-   accessModes:
-     - ReadWriteOnce
-   resources:
-     requests:
-       storage: 10Gi
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
