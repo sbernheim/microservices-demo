@@ -31,6 +31,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: carts-db-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-db-ha
 spec:
@@ -44,6 +45,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: carts-db-tmp-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
 spec:
@@ -57,6 +59,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: catalogue-db-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-db-ha
 spec:
@@ -70,6 +73,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: orders-db-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-db-ha
 spec:
@@ -83,6 +87,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: orders-db-tmp-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
 spec:
@@ -96,6 +101,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: orders-tmp-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
 spec:
@@ -109,6 +115,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: carts-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
 spec:
@@ -122,6 +129,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: rabbitmq-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-queue-ha
 spec:
@@ -135,6 +143,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: shipping-tmp-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
 spec:
@@ -148,6 +157,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: users-db-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-db-ha
 spec:
@@ -161,6 +171,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
    name: users-db-tmp-pvc
+   namespace: sock-shop
    annotations:
      volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
 spec:
