@@ -661,6 +661,7 @@ spec:
               - SETUID
               - DAC_OVERRIDE
           readOnlyRootFilesystem: true
+        volumeMounts:
         - mountPath: /var/lib/rabbitmq
           name: rabbitmq
       volumes:
