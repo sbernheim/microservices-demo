@@ -169,7 +169,7 @@ spec:
    resources:
      requests:
        storage: 5Gi
-===
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
