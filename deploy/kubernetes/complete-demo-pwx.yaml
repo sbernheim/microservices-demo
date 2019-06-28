@@ -44,20 +44,6 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-   name: carts-db-tmp-pvc
-   namespace: sock-shop
-   annotations:
-     volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
-spec:
-   accessModes:
-     - ReadWriteOnce
-   resources:
-     requests:
-       storage: 5Gi
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
    name: catalogue-db-pvc
    namespace: sock-shop
    annotations:
@@ -82,20 +68,6 @@ spec:
    resources:
      requests:
        storage: 10Gi
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-   name: orders-db-tmp-pvc
-   namespace: sock-shop
-   annotations:
-     volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
-spec:
-   accessModes:
-     - ReadWriteOnce
-   resources:
-     requests:
-       storage: 5Gi
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -167,20 +139,6 @@ spec:
      requests:
        storage: 10Gi
 ---
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-   name: users-db-tmp-pvc
-   namespace: sock-shop
-   annotations:
-     volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
-spec:
-   accessModes:
-     - ReadWriteOnce
-   resources:
-     requests:
-       storage: 5Gi
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -201,18 +159,27 @@ spec:
         ports:
         - name: mongo
           containerPort: 27017
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /data/db
           name: carts-db
         - mountPath: /tmp
-          name: carts-db-tmp
+          name: tmp-volume
       volumes:
       - name: carts-db
         persistentVolumeClaim:
           claimName: carts-db-pvc
-      - name: carts-db-tmp
-        persistentVolumeClaim:
-          claimName: carts-db-tmp-pvc
+      - name: tmp-volume
+          emptyDir:
+            medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -452,18 +419,27 @@ spec:
         ports:
         - name: mongo
           containerPort: 27017
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /data/db
           name: orders-db
         - mountPath: /tmp
-          name: orders-tmp
+          name: tmp-volume
       volumes:
       - name: orders-db
         persistentVolumeClaim:
           claimName: orders-db-pvc
-      - name: orders-tmp
-        persistentVolumeClaim:
-          claimName: orders-db-tmp-pvc
+      - name: tmp-volume
+          emptyDir:
+            medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -757,18 +733,27 @@ spec:
         ports:
         - name: mongo
           containerPort: 27017
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /data/db
           name: users-db
         - mountPath: /tmp
-          name: users-db-tmp
+          name: tmp-volume
       volumes:
       - name: users-db
         persistentVolumeClaim:
           claimName: users-db-pvc
-      - name: users-db-tmp
-        persistentVolumeClaim:
-          claimName: users-db-tmp-pvc
+      - name: tmp-volume
+          emptyDir:
+            medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
