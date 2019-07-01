@@ -1,3 +1,144 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+    name: portworx-db-ha
+provisioner: kubernetes.io/portworx-volume
+parameters:
+   repl: "3"
+   io_profile: "db"
+   priority_io: "high"
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+    name: portworx-tmp-fs
+provisioner: kubernetes.io/portworx-volume
+parameters:
+   repl: "1"
+   shared: "true"
+   priority_io: "high"
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+    name: portworx-queue-ha
+provisioner: kubernetes.io/portworx-volume
+parameters:
+   repl: "2"
+   priority_io: "high"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: carts-db-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-db-ha
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 10Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: catalogue-db-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-db-ha
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 10Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: orders-db-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-db-ha
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 10Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: orders-tmp-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 5Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: carts-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 5Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: rabbitmq-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-queue-ha
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 5Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: shipping-tmp-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-tmp-fs
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 5Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: users-db-pvc
+   namespace: sock-shop
+   annotations:
+     volume.beta.kubernetes.io/storage-class: portworx-db-ha
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 10Gi
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -28,12 +169,17 @@ spec:
               - SETUID
           readOnlyRootFilesystem: true
         volumeMounts:
+        - mountPath: /data/db
+          name: carts-db
         - mountPath: /tmp
           name: tmp-volume
       volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+      - name: carts-db
+        persistentVolumeClaim:
+          claimName: carts-db-pvc
+      - name: tmp-volume
+        emptyDir:
+          medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -87,11 +233,11 @@ spec:
           readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp
-          name: tmp-volume
+          name: carts-volume
       volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+        - name: carts-volume
+          persistentVolumeClaim:
+            claimName: carts-pvc
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -135,6 +281,13 @@ spec:
         ports:
         - name: mysql
           containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: catalogue-volume
+      volumes:
+        - name: catalogue-volume
+          persistentVolumeClaim:
+            claimName: catalogue-db-pvc
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -238,11 +391,10 @@ metadata:
     name: front-end
   namespace: sock-shop
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 8079
-    nodePort: 30001
   selector:
     name: front-end
 ---
@@ -276,12 +428,17 @@ spec:
               - SETUID
           readOnlyRootFilesystem: true
         volumeMounts:
+        - mountPath: /data/db
+          name: orders-db
         - mountPath: /tmp
           name: tmp-volume
       volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+      - name: orders-db
+        persistentVolumeClaim:
+          claimName: orders-db-pvc
+      - name: tmp-volume
+        emptyDir:
+          medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -335,11 +492,11 @@ spec:
           readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp
-          name: tmp-volume
+          name: orders-tmp
       volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+      - name: orders-tmp
+        persistentVolumeClaim:
+          claimName: orders-tmp-pvc
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -472,6 +629,13 @@ spec:
               - SETUID
               - DAC_OVERRIDE
           readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: rabbitmq
+      volumes:
+      - name: rabbitmq
+        persistentVolumeClaim:
+          claimName: rabbitmq-pvc
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -525,11 +689,11 @@ spec:
           readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp
-          name: tmp-volume
+          name: shipping-tmp-volume
       volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+        - name: shipping-tmp-volume
+          persistentVolumeClaim:
+            claimName: shipping-tmp-pvc
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
@@ -578,12 +742,17 @@ spec:
               - SETUID
           readOnlyRootFilesystem: true
         volumeMounts:
+        - mountPath: /data/db
+          name: users-db
         - mountPath: /tmp
           name: tmp-volume
       volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+      - name: users-db
+        persistentVolumeClaim:
+          claimName: users-db-pvc
+      - name: tmp-volume
+        emptyDir:
+          medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
