@@ -215,7 +215,7 @@ spec:
     spec:
       containers:
       - name: carts
-        image: weaveworksdemos/carts:0.4.8
+        image: weaveworksdemos/carts:master-f676ca14
         ports:
         - containerPort: 80
         env:
