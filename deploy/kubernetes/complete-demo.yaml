@@ -161,7 +161,7 @@ spec:
         - name: mongo
           containerPort: 27017
         volumeMounts:
-        - mountPath: /data/db
+        - mountPath: /data/
           name: carts-db
         - mountPath: /tmp
           name: tmp-volume
@@ -412,7 +412,7 @@ spec:
         - name: mongo
           containerPort: 27017
         volumeMounts:
-        - mountPath: /data/db
+        - mountPath: /data/
           name: orders-db
         - mountPath: /tmp
           name: tmp-volume
@@ -709,7 +709,7 @@ spec:
         - name: mongo
           containerPort: 27017
         volumeMounts:
-        - mountPath: /data/db
+        - mountPath: /data/
           name: users-db
         - mountPath: /tmp
           name: tmp-volume
