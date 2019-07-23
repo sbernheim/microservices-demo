@@ -265,7 +265,7 @@ spec:
     spec:
       containers:
       - name: catalogue-db
-        image: weaveworksdemos/catalogue-db:master-825d966a
+        image: weaveworksdemos/catalogue-db:master-bf571e15
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: fake_password
